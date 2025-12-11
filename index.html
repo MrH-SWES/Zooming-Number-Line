@@ -30,6 +30,36 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
+        .zoom-bar-container {
+            margin-bottom: 40px;
+        }
+        
+        .zoom-bar {
+            position: relative;
+            height: 12px;
+            background: linear-gradient(to right, #3498db, #9b59b6, #e74c3c);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .zoom-indicator {
+            position: absolute;
+            top: -6px;
+            width: 4px;
+            height: 24px;
+            background: #2c3e50;
+            border-radius: 2px;
+            transition: left 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .zoom-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+        
         input[type="number"] {
             width: 100%;
             padding: 20px;
@@ -47,11 +77,14 @@
             border-bottom-color: #2980b9;
         }
         
-        .zoom-level {
-            text-align: center;
-            font-size: 1.1rem;
-            color: #7f8c8d;
-            margin-bottom: 30px;
+        /* Remove spinner buttons */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
         }
         
         .number-line-container {
@@ -115,14 +148,35 @@
                 font-size: 2rem;
                 padding: 15px;
             }
+            
+            .zoom-labels {
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <input type="number" id="numberInput" step="any" value="30" placeholder="0">
+        <div class="zoom-bar-container">
+            <div class="zoom-bar">
+                <div class="zoom-indicator" id="zoomIndicator"></div>
+            </div>
+            <div class="zoom-labels">
+                <span>0.0001</span>
+                <span>0.001</span>
+                <span>0.01</span>
+                <span>0.1</span>
+                <span>1</span>
+                <span>10</span>
+                <span>100</span>
+                <span>1K</span>
+                <span>10K</span>
+                <span>100K</span>
+                <span>1M</span>
+            </div>
+        </div>
         
-        <div class="zoom-level" id="zoomLevel">Ones · Ctrl+Scroll to zoom</div>
+        <input type="number" id="numberInput" step="any" value="30" placeholder="0" min="0">
         
         <div class="number-line-container" id="numberLineContainer">
             <div class="number-line" id="numberLine"></div>
@@ -131,31 +185,36 @@
     
     <script>
         const ZOOM_LEVELS = [
-            { name: 'Millions', step: 1000000, decimals: 0 },
-            { name: 'Hundred Thousands', step: 100000, decimals: 0 },
-            { name: 'Ten Thousands', step: 10000, decimals: 0 },
-            { name: 'Thousands', step: 1000, decimals: 0 },
-            { name: 'Hundreds', step: 100, decimals: 0 },
-            { name: 'Tens', step: 10, decimals: 0 },
-            { name: 'Ones', step: 1, decimals: 1 },
-            { name: 'Tenths', step: 0.1, decimals: 2 },
-            { name: 'Hundredths', step: 0.01, decimals: 3 },
+            { name: 'Ten Thousandths', step: 0.0001, decimals: 5 },
             { name: 'Thousandths', step: 0.001, decimals: 4 },
-            { name: 'Ten Thousandths', step: 0.0001, decimals: 5 }
+            { name: 'Hundredths', step: 0.01, decimals: 3 },
+            { name: 'Tenths', step: 0.1, decimals: 2 },
+            { name: 'Ones', step: 1, decimals: 1 },
+            { name: 'Tens', step: 10, decimals: 0 },
+            { name: 'Hundreds', step: 100, decimals: 0 },
+            { name: 'Thousands', step: 1000, decimals: 0 },
+            { name: 'Ten Thousands', step: 10000, decimals: 0 },
+            { name: 'Hundred Thousands', step: 100000, decimals: 0 },
+            { name: 'Millions', step: 1000000, decimals: 0 }
         ];
         
-        let currentZoomIndex = 6;
+        let currentZoomIndex = 4;
         let currentValue = 30;
         let lastTouchDistance = null;
         
         const numberInput = document.getElementById('numberInput');
         const numberLine = document.getElementById('numberLine');
         const numberLineContainer = document.getElementById('numberLineContainer');
-        const zoomLevel = document.getElementById('zoomLevel');
+        const zoomIndicator = document.getElementById('zoomIndicator');
         
         numberInput.addEventListener('input', () => {
-            currentValue = parseFloat(numberInput.value) || 0;
-            updateNumberLine();
+            const val = parseFloat(numberInput.value);
+            if (val >= 0 || numberInput.value === '') {
+                currentValue = val || 0;
+                updateNumberLine();
+            } else {
+                numberInput.value = currentValue;
+            }
         });
         
         // Ctrl+Scroll zoom
@@ -215,12 +274,16 @@
             const step = zoom.step;
             const decimals = zoom.decimals;
             
-            // Center the value on the number line
-            const min = currentValue - step / 2;
+            // Update zoom indicator position (0 = leftmost, 10 = rightmost)
+            const indicatorPosition = (currentZoomIndex / (ZOOM_LEVELS.length - 1)) * 100;
+            zoomIndicator.style.left = `calc(${indicatorPosition}% - 2px)`;
+            
+            // Number line from 0 to (currentValue + half step)
+            const min = 0;
             const max = currentValue + step / 2;
             
-            // Update zoom level display
-            zoomLevel.textContent = `${zoom.name} · Ctrl+Scroll to zoom`;
+            // Calculate position of red dot
+            const dotPosition = (currentValue / max) * 100;
             
             // Draw 11 ticks
             for (let i = 0; i <= 10; i++) {
@@ -236,7 +299,7 @@
                 numberLine.appendChild(tick);
             }
             
-            // Label left, center, right
+            // Label left (0), middle, right
             [0, 5, 10].forEach(i => {
                 const value = min + (max - min) * (i / 10);
                 const position = (i / 10) * 100;
@@ -245,7 +308,7 @@
                 label.className = 'tick-label';
                 label.style.left = position + '%';
                 
-                if (decimals === 0 && Math.abs(value) >= 1000) {
+                if (decimals === 0 && value >= 1000) {
                     label.textContent = value.toLocaleString(undefined, {maximumFractionDigits: 0});
                 } else {
                     label.textContent = value.toFixed(decimals);
@@ -254,9 +317,10 @@
                 numberLine.appendChild(label);
             });
             
-            // Ghost dot always centered
+            // Ghost dot at value position
             const ghostDot = document.createElement('div');
             ghostDot.className = 'ghost-dot';
+            ghostDot.style.left = dotPosition + '%';
             numberLine.appendChild(ghostDot);
         }
         
