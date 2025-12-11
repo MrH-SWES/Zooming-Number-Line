@@ -19,10 +19,11 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            touch-action: pan-y pinch-zoom;
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
             background: white;
             border-radius: 12px;
@@ -51,8 +52,8 @@
         
         input[type="number"] {
             width: 100%;
-            padding: 15px;
-            font-size: 1.5rem;
+            padding: 20px;
+            font-size: 2rem;
             border: 3px solid #3498db;
             border-radius: 8px;
             text-align: center;
@@ -66,41 +67,68 @@
         }
         
         .zoom-controls {
-            display: flex;
-            gap: 10px;
             margin-bottom: 30px;
+            text-align: center;
         }
         
-        .zoom-button {
-            flex: 1;
-            padding: 15px;
+        .zoom-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .zoom-level {
+            font-size: 1.5rem;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        
+        .zoom-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .zoom-btn {
+            width: 60px;
+            height: 60px;
             border: 3px solid #3498db;
             background: white;
             color: #3498db;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 50%;
+            font-size: 2rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .zoom-button:hover {
+        .zoom-btn:hover {
             background: #3498db;
             color: white;
-            transform: translateY(-2px);
+            transform: scale(1.1);
         }
         
-        .zoom-button.active {
-            background: #3498db;
-            color: white;
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .pinch-hint {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 10px;
         }
         
         .number-line-container {
             position: relative;
             margin: 40px 0;
             min-height: 150px;
+            touch-action: pinch-zoom;
         }
         
         .number-line {
@@ -130,6 +158,7 @@
             font-weight: bold;
             font-size: 1rem;
             color: #2c3e50;
+            white-space: nowrap;
         }
         
         .tick-label.major {
@@ -148,52 +177,7 @@
             transform: translate(-50%, -50%);
             z-index: 10;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: left 0.5s ease-out;
-        }
-        
-        .zoom-info {
-            text-align: center;
-            padding: 15px;
-            background: #ecf0f1;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        
-        .zoom-info h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .zoom-info p {
-            color: #7f8c8d;
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-        
-        .quick-numbers {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .quick-number {
-            flex: 1;
-            min-width: 80px;
-            padding: 10px;
-            background: #95a5a6;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .quick-number:hover {
-            background: #7f8c8d;
-            transform: translateY(-2px);
+            transition: left 0.3s ease-out;
         }
         
         @media (max-width: 768px) {
@@ -201,12 +185,15 @@
                 padding: 20px;
             }
             
-            .zoom-controls {
-                flex-direction: column;
+            input[type="number"] {
+                font-size: 1.5rem;
+                padding: 15px;
             }
             
-            .zoom-button {
-                min-height: 50px;
+            .zoom-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -217,52 +204,50 @@
         
         <div class="input-section">
             <label for="numberInput">Enter a decimal number:</label>
-            <input type="number" id="numberInput" step="0.01" value="3.47" placeholder="e.g. 3.47">
-            
-            <div class="quick-numbers">
-                <button class="quick-number" onclick="setNumber(0.19)">0.19</button>
-                <button class="quick-number" onclick="setNumber(0.2)">0.2</button>
-                <button class="quick-number" onclick="setNumber(3.47)">3.47</button>
-                <button class="quick-number" onclick="setNumber(12.68)">12.68</button>
-                <button class="quick-number" onclick="setNumber(45.03)">45.03</button>
-            </div>
+            <input type="number" id="numberInput" step="any" value="3.47" placeholder="Type any number">
         </div>
         
         <div class="zoom-controls">
-            <button class="zoom-button active" id="zoomOnes">
-                Ones Place<br>
-                <small>(Whole numbers)</small>
-            </button>
-            <button class="zoom-button" id="zoomTenths">
-                Tenths Place<br>
-                <small>(0.1 intervals)</small>
-            </button>
-            <button class="zoom-button" id="zoomHundredths">
-                Hundredths Place<br>
-                <small>(0.01 intervals)</small>
-            </button>
+            <div class="zoom-label">Zoom Level</div>
+            <div class="zoom-level" id="zoomLevel">Ones Place</div>
+            <div class="zoom-buttons">
+                <button class="zoom-btn" id="zoomOut" title="Zoom Out">−</button>
+                <button class="zoom-btn" id="zoomIn" title="Zoom In">+</button>
+            </div>
+            <div class="pinch-hint">💡 Pinch to zoom on touchscreen</div>
         </div>
         
-        <div class="number-line-container">
+        <div class="number-line-container" id="numberLineContainer">
             <div class="number-line" id="numberLine"></div>
-        </div>
-        
-        <div class="zoom-info" id="zoomInfo">
-            <h3>Zoomed to: Ones Place</h3>
-            <p>You're looking at whole numbers. Each space = 0.1</p>
         </div>
     </div>
     
     <script>
-        let currentZoom = 'ones';
+        // Zoom levels from largest to smallest
+        const ZOOM_LEVELS = [
+            { name: 'Millions', step: 1000000, decimals: 0 },
+            { name: 'Hundred Thousands', step: 100000, decimals: 0 },
+            { name: 'Ten Thousands', step: 10000, decimals: 0 },
+            { name: 'Thousands', step: 1000, decimals: 0 },
+            { name: 'Hundreds', step: 100, decimals: 0 },
+            { name: 'Tens', step: 10, decimals: 0 },
+            { name: 'Ones', step: 1, decimals: 1 },
+            { name: 'Tenths', step: 0.1, decimals: 2 },
+            { name: 'Hundredths', step: 0.01, decimals: 3 },
+            { name: 'Thousandths', step: 0.001, decimals: 4 },
+            { name: 'Ten Thousandths', step: 0.0001, decimals: 5 }
+        ];
+        
+        let currentZoomIndex = 6; // Start at Ones
         let currentValue = 3.47;
+        let lastTouchDistance = null;
         
         const numberInput = document.getElementById('numberInput');
         const numberLine = document.getElementById('numberLine');
-        const zoomInfo = document.getElementById('zoomInfo');
-        const zoomOnes = document.getElementById('zoomOnes');
-        const zoomTenths = document.getElementById('zoomTenths');
-        const zoomHundredths = document.getElementById('zoomHundredths');
+        const numberLineContainer = document.getElementById('numberLineContainer');
+        const zoomLevel = document.getElementById('zoomLevel');
+        const zoomIn = document.getElementById('zoomIn');
+        const zoomOut = document.getElementById('zoomOut');
         
         // Input change handler
         numberInput.addEventListener('input', () => {
@@ -271,66 +256,93 @@
         });
         
         // Zoom button handlers
-        zoomOnes.addEventListener('click', () => {
-            currentZoom = 'ones';
-            updateZoomButtons();
-            updateNumberLine();
+        zoomIn.addEventListener('click', () => {
+            if (currentZoomIndex < ZOOM_LEVELS.length - 1) {
+                currentZoomIndex++;
+                updateNumberLine();
+            }
         });
         
-        zoomTenths.addEventListener('click', () => {
-            currentZoom = 'tenths';
-            updateZoomButtons();
-            updateNumberLine();
+        zoomOut.addEventListener('click', () => {
+            if (currentZoomIndex > 0) {
+                currentZoomIndex--;
+                updateNumberLine();
+            }
         });
         
-        zoomHundredths.addEventListener('click', () => {
-            currentZoom = 'hundredths';
-            updateZoomButtons();
-            updateNumberLine();
+        // Pinch to zoom
+        numberLineContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                lastTouchDistance = getTouchDistance(e.touches);
+            }
         });
         
-        function updateZoomButtons() {
-            [zoomOnes, zoomTenths, zoomHundredths].forEach(btn => btn.classList.remove('active'));
-            if (currentZoom === 'ones') zoomOnes.classList.add('active');
-            if (currentZoom === 'tenths') zoomTenths.classList.add('active');
-            if (currentZoom === 'hundredths') zoomHundredths.classList.add('active');
+        numberLineContainer.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && lastTouchDistance) {
+                e.preventDefault();
+                const currentDistance = getTouchDistance(e.touches);
+                const delta = currentDistance - lastTouchDistance;
+                
+                if (Math.abs(delta) > 10) { // Threshold to avoid jitter
+                    if (delta > 0 && currentZoomIndex < ZOOM_LEVELS.length - 1) {
+                        // Pinch out = zoom in
+                        currentZoomIndex++;
+                        updateNumberLine();
+                    } else if (delta < 0 && currentZoomIndex > 0) {
+                        // Pinch in = zoom out
+                        currentZoomIndex--;
+                        updateNumberLine();
+                    }
+                    lastTouchDistance = currentDistance;
+                }
+            }
+        });
+        
+        numberLineContainer.addEventListener('touchend', () => {
+            lastTouchDistance = null;
+        });
+        
+        // Wheel zoom (for desktop)
+        numberLineContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0 && currentZoomIndex < ZOOM_LEVELS.length - 1) {
+                // Scroll up = zoom in
+                currentZoomIndex++;
+                updateNumberLine();
+            } else if (e.deltaY > 0 && currentZoomIndex > 0) {
+                // Scroll down = zoom out
+                currentZoomIndex--;
+                updateNumberLine();
+            }
+        });
+        
+        function getTouchDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
         }
         
         function updateNumberLine() {
             numberLine.innerHTML = '';
             
-            let min, max, majorStep, minorStep, decimals, zoomText, explanation;
+            const zoom = ZOOM_LEVELS[currentZoomIndex];
+            const step = zoom.step;
+            const decimals = zoom.decimals;
             
-            if (currentZoom === 'ones') {
-                // Show the whole number it's between
-                min = Math.floor(currentValue);
-                max = min + 1;
-                majorStep = 1;
-                minorStep = 0.1;
-                decimals = 1;
-                zoomText = "Ones Place";
-                explanation = `Looking at ${min} to ${max}. Each small tick = 0.1`;
-            } else if (currentZoom === 'tenths') {
-                // Show the tenth it's between
-                min = Math.floor(currentValue * 10) / 10;
-                max = min + 0.1;
-                majorStep = 0.1;
-                minorStep = 0.01;
-                decimals = 2;
-                zoomText = "Tenths Place";
-                explanation = `Looking at ${min.toFixed(1)} to ${max.toFixed(1)}. Each small tick = 0.01`;
-            } else {
-                // Show the hundredth it's between
-                min = Math.floor(currentValue * 100) / 100;
-                max = min + 0.01;
-                majorStep = 0.01;
-                minorStep = 0.001;
-                decimals = 3;
-                zoomText = "Hundredths Place";
-                explanation = `Looking at ${min.toFixed(2)} to ${max.toFixed(2)}. Each tiny tick = 0.001`;
-            }
+            // Calculate range
+            const min = Math.floor(currentValue / step) * step;
+            const max = min + step;
             
-            // Draw minor ticks (10 divisions)
+            // Update zoom level display
+            zoomLevel.textContent = zoom.name;
+            
+            // Enable/disable buttons
+            zoomOut.style.opacity = currentZoomIndex === 0 ? '0.3' : '1';
+            zoomOut.style.cursor = currentZoomIndex === 0 ? 'not-allowed' : 'pointer';
+            zoomIn.style.opacity = currentZoomIndex === ZOOM_LEVELS.length - 1 ? '0.3' : '1';
+            zoomIn.style.cursor = currentZoomIndex === ZOOM_LEVELS.length - 1 ? 'not-allowed' : 'pointer';
+            
+            // Draw 11 ticks (0 through 10)
             for (let i = 0; i <= 10; i++) {
                 const value = min + (max - min) * (i / 10);
                 const position = (i / 10) * 100;
@@ -343,14 +355,21 @@
                 tick.style.left = position + '%';
                 numberLine.appendChild(tick);
                 
-                // Only label major ticks and midpoint
+                // Label major ticks and midpoint
                 if (i === 0 || i === 5 || i === 10) {
                     const label = document.createElement('div');
                     label.className = 'tick-label';
                     if (i === 0 || i === 10) {
                         label.classList.add('major');
                     }
-                    label.textContent = value.toFixed(decimals);
+                    
+                    // Format large numbers with commas
+                    if (decimals === 0 && value >= 1000) {
+                        label.textContent = value.toLocaleString();
+                    } else {
+                        label.textContent = value.toFixed(decimals);
+                    }
+                    
                     label.style.left = position + '%';
                     numberLine.appendChild(label);
                 }
@@ -360,20 +379,8 @@
             const position = ((currentValue - min) / (max - min) * 100);
             const ghostDot = document.createElement('div');
             ghostDot.className = 'ghost-dot';
-            ghostDot.style.left = position + '%';
+            ghostDot.style.left = Math.max(0, Math.min(100, position)) + '%';
             numberLine.appendChild(ghostDot);
-            
-            // Update info
-            zoomInfo.innerHTML = `
-                <h3>Zoomed to: ${zoomText}</h3>
-                <p><strong>${currentValue}</strong> is here. ${explanation}</p>
-            `;
-        }
-        
-        function setNumber(num) {
-            numberInput.value = num;
-            currentValue = num;
-            updateNumberLine();
         }
         
         // Initialize
