@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decimal Place Value Tool</title>
+    <title>Zooming Number Line</title>
     <style>
         * {
             margin: 0;
@@ -15,251 +15,66 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f5f5;
             padding: 20px;
-            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         h1 {
             text-align: center;
             color: #2c3e50;
             margin-bottom: 30px;
-            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-size: clamp(1.5rem, 4vw, 2rem);
         }
         
-        .panels {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+        .input-section {
             margin-bottom: 30px;
         }
         
-        .panel {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .panel h2 {
+        label {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: bold;
             color: #34495e;
-            margin-bottom: 15px;
-            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            margin-bottom: 10px;
         }
         
-        /* Panel 1: Card Stacking */
-        .card-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .card {
-            background: #3498db;
-            color: white;
+        input[type="number"] {
+            width: 100%;
             padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: grab;
-            font-size: 1.2rem;
-            font-weight: bold;
-            user-select: none;
-            transition: transform 0.2s, box-shadow 0.2s;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .card::before {
-            content: '⋮⋮';
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.7;
-            font-size: 1rem;
-        }
-        
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .card:active {
-            cursor: grabbing;
-        }
-        
-        .card.ones { background: #e74c3c; }
-        .card.tenths { background: #f39c12; }
-        .card.hundredths { background: #27ae60; }
-        
-        .stack-area {
-            min-height: 200px;
-            border: 3px dashed #bdc3c7;
-            border-radius: 8px;
-            padding: 15px;
-            background: #ecf0f1;
-            position: relative;
-        }
-        
-        .stack-area.drag-over {
-            border-color: #3498db;
-            background: #d5e8f7;
-        }
-        
-        .stacked-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .stacked-card {
-            background: #3498db;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-            min-height: 50px;
-        }
-        
-        .stacked-card:hover {
-            transform: translateX(5px);
-        }
-        
-        .stacked-card.ones { background: #e74c3c; }
-        .stacked-card.tenths { background: #f39c12; }
-        .stacked-card.hundredths { background: #27ae60; }
-        
-        .stacked-card .remove {
-            background: rgba(255,255,255,0.3);
-            border: none;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .stacked-card .remove:hover {
-            background: rgba(255,255,255,0.5);
-        }
-        
-        .total-display {
-            margin-top: 15px;
-            padding: 15px;
-            background: #2c3e50;
-            color: white;
-            border-radius: 8px;
-            text-align: center;
             font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .send-button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 15px;
-            background: #9b59b6;
-            color: white;
-            border: none;
+            border: 3px solid #3498db;
             border-radius: 8px;
-            font-size: 1.1rem;
+            text-align: center;
             font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            min-height: 50px;
         }
         
-        .send-button:hover:not(:disabled) {
-            background: #8e44ad;
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
         
-        .send-button:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
-        
-        /* Panel 2: Number Line */
-        .number-line-container {
-            position: relative;
-            margin: 20px 0;
-        }
-        
-        .number-line {
-            width: 100%;
-            height: 80px;
-            position: relative;
-            background: linear-gradient(to bottom, transparent 45%, #34495e 45%, #34495e 55%, transparent 55%);
-        }
-        
-        .tick {
-            position: absolute;
-            top: 0;
-            width: 2px;
-            height: 100%;
-            background: #34495e;
-        }
-        
-        .tick-label {
-            position: absolute;
-            top: 100%;
-            transform: translateX(-50%);
-            margin-top: 5px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        
-        .ghost-dot {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #e74c3c;
-            border: 3px solid white;
-            border-radius: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        
-        .zone-overlay {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            opacity: 0.2;
-        }
-        
-        .zone-overlay.blue { background: #3498db; }
-        .zone-overlay.red { background: #e74c3c; }
-        
-        .rounding-controls {
+        .zoom-controls {
             display: flex;
             gap: 10px;
-            margin: 15px 0;
-            flex-wrap: wrap;
+            margin-bottom: 30px;
         }
         
-        .rounding-controls button {
+        .zoom-button {
             flex: 1;
-            min-width: 120px;
-            padding: 12px;
-            border: 2px solid #3498db;
+            padding: 15px;
+            border: 3px solid #3498db;
             background: white;
             color: #3498db;
             border-radius: 8px;
@@ -267,381 +82,211 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            min-height: 50px;
+            min-height: 60px;
         }
         
-        .rounding-controls button:hover {
+        .zoom-button:hover {
             background: #3498db;
             color: white;
+            transform: translateY(-2px);
         }
         
-        .rounding-controls button.active {
+        .zoom-button.active {
             background: #3498db;
             color: white;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
         }
         
-        .mistake-mode {
-            margin-top: 15px;
-            padding: 12px;
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            border-radius: 4px;
-            display: none;
+        .number-line-container {
+            position: relative;
+            margin: 40px 0;
+            min-height: 150px;
         }
         
-        .mistake-mode.show {
-            display: block;
+        .number-line {
+            width: 100%;
+            height: 100px;
+            position: relative;
+            background: linear-gradient(to bottom, transparent 48%, #2c3e50 48%, #2c3e50 52%, transparent 52%);
         }
         
-        .wrong-dot {
+        .tick {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #ff6b6b;
-            border: 3px solid white;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: #2c3e50;
+        }
+        
+        .tick.major {
+            width: 4px;
+            background: #1a252f;
+        }
+        
+        .tick-label {
+            position: absolute;
+            top: 110px;
+            transform: translateX(-50%);
+            font-weight: bold;
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+        
+        .tick-label.major {
+            font-size: 1.2rem;
+            color: #1a252f;
+        }
+        
+        .ghost-dot {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #e74c3c;
+            border: 4px solid white;
             border-radius: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            z-index: 9;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            opacity: 0.6;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: left 0.5s ease-out;
         }
         
-        .toggle-mistake {
-            margin-top: 15px;
-            padding: 10px;
-            background: #f8f9fa;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-height: 50px;
-        }
-        
-        .toggle-mistake input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-        
-        /* Panel 3: Builder */
-        .builder-slots {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        
-        .builder-slot {
-            flex: 1;
-            min-width: 80px;
-            min-height: 80px;
-            border: 3px dashed #bdc3c7;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            background: #ecf0f1;
-            position: relative;
-            transition: all 0.3s;
-        }
-        
-        .builder-slot.filled {
-            border-color: #3498db;
-            background: white;
-        }
-        
-        .builder-slot.drag-over {
-            border-color: #3498db;
-            background: #d5e8f7;
-        }
-        
-        .slot-label {
-            position: absolute;
-            top: -25px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #34495e;
-        }
-        
-        .slot-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .builder-equation {
-            margin-top: 20px;
+        .zoom-info {
+            text-align: center;
             padding: 15px;
             background: #ecf0f1;
             border-radius: 8px;
-            font-size: 1.3rem;
-            text-align: center;
-            font-weight: bold;
-            color: #2c3e50;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin-top: 20px;
         }
         
-        .clear-button {
+        .zoom-info h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .zoom-info p {
+            color: #7f8c8d;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .quick-numbers {
+            display: flex;
+            gap: 10px;
             margin-top: 15px;
-            width: 100%;
-            padding: 12px;
-            background: #e74c3c;
+            flex-wrap: wrap;
+        }
+        
+        .quick-number {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px;
+            background: #95a5a6;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
-            min-height: 50px;
+            transition: all 0.3s;
         }
         
-        .clear-button:hover {
-            background: #c0392b;
+        .quick-number:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
         }
         
         @media (max-width: 768px) {
-            .panels {
-                grid-template-columns: 1fr;
+            .container {
+                padding: 20px;
             }
             
-            .card-options {
-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            .zoom-controls {
+                flex-direction: column;
             }
-        }
-        
-        /* Animations */
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.2); }
-        }
-        
-        .ghost-dot.animate {
-            animation: pulse 0.5s ease-in-out;
+            
+            .zoom-button {
+                min-height: 50px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔢 Decimal Place Value Tool</h1>
+        <h1>🔍 Zooming Number Line</h1>
         
-        <div class="panels">
-            <!-- Panel 1: Card Stacking -->
-            <div class="panel">
-                <h2>1. Build Your Number</h2>
-                <div class="card-options">
-                    <div class="card ones" draggable="true" data-value="1" data-type="ones">1</div>
-                    <div class="card tenths" draggable="true" data-value="0.1" data-type="tenths">0.1</div>
-                    <div class="card hundredths" draggable="true" data-value="0.01" data-type="hundredths">0.01</div>
-                </div>
-                
-                <div class="stack-area" id="stackArea">
-                    <div class="stacked-cards" id="stackedCards"></div>
-                </div>
-                
-                <div class="total-display" id="totalDisplay">Total: 0</div>
-                <button class="send-button" id="sendButton" disabled>Send to Number Line →</button>
-            </div>
+        <div class="input-section">
+            <label for="numberInput">Enter a decimal number:</label>
+            <input type="number" id="numberInput" step="0.01" value="3.47" placeholder="e.g. 3.47">
             
-            <!-- Panel 2: Number Line -->
-            <div class="panel">
-                <h2>2. See Where It Lives</h2>
-                <div class="rounding-controls">
-                    <button id="zoomOnes" class="active">Ones Place</button>
-                    <button id="zoomTenths">Tenths Place</button>
-                    <button id="zoomHundredths">Hundredths Place</button>
-                </div>
-                
-                <div class="number-line-container">
-                    <div class="number-line" id="numberLine"></div>
-                </div>
-                
-                <label class="toggle-mistake">
-                    <input type="checkbox" id="mistakeToggle">
-                    <span>Show common mistake</span>
-                </label>
-                
-                <div class="mistake-mode" id="mistakeMessage"></div>
+            <div class="quick-numbers">
+                <button class="quick-number" onclick="setNumber(0.19)">0.19</button>
+                <button class="quick-number" onclick="setNumber(0.2)">0.2</button>
+                <button class="quick-number" onclick="setNumber(3.47)">3.47</button>
+                <button class="quick-number" onclick="setNumber(12.68)">12.68</button>
+                <button class="quick-number" onclick="setNumber(45.03)">45.03</button>
             </div>
-            
-            <!-- Panel 3: Builder -->
-            <div class="panel">
-                <h2>3. Break It Apart</h2>
-                <div class="builder-slots">
-                    <div class="builder-slot" id="tensSlot" data-place="tens">
-                        <span class="slot-label">Tens</span>
-                        <span class="slot-value"></span>
-                    </div>
-                    <div class="builder-slot" id="onesSlot" data-place="ones">
-                        <span class="slot-label">Ones</span>
-                        <span class="slot-value"></span>
-                    </div>
-                    <div class="builder-slot" id="tenthsSlot" data-place="tenths">
-                        <span class="slot-label">Tenths</span>
-                        <span class="slot-value"></span>
-                    </div>
-                    <div class="builder-slot" id="hundredthsSlot" data-place="hundredths">
-                        <span class="slot-label">Hundredths</span>
-                        <span class="slot-value"></span>
-                    </div>
-                </div>
-                
-                <div class="builder-equation" id="builderEquation">
-                    Drag cards here to see the equation
-                </div>
-                
-                <button class="clear-button" id="clearBuilder">Clear All</button>
-            </div>
+        </div>
+        
+        <div class="zoom-controls">
+            <button class="zoom-button active" id="zoomOnes">
+                Ones Place<br>
+                <small>(Whole numbers)</small>
+            </button>
+            <button class="zoom-button" id="zoomTenths">
+                Tenths Place<br>
+                <small>(0.1 intervals)</small>
+            </button>
+            <button class="zoom-button" id="zoomHundredths">
+                Hundredths Place<br>
+                <small>(0.01 intervals)</small>
+            </button>
+        </div>
+        
+        <div class="number-line-container">
+            <div class="number-line" id="numberLine"></div>
+        </div>
+        
+        <div class="zoom-info" id="zoomInfo">
+            <h3>Zoomed to: Ones Place</h3>
+            <p>You're looking at whole numbers. Each space = 0.1</p>
         </div>
     </div>
     
     <script>
-        // State
-        let stack = [];
-        let currentTotal = 0;
         let currentZoom = 'ones';
-        let builderSlots = {
-            tens: 0,
-            ones: 0,
-            tenths: 0,
-            hundredths: 0
-        };
+        let currentValue = 3.47;
         
-        // Panel 1: Card Stacking
-        const cards = document.querySelectorAll('.card');
-        const stackArea = document.getElementById('stackArea');
-        const stackedCardsContainer = document.getElementById('stackedCards');
-        const totalDisplay = document.getElementById('totalDisplay');
-        const sendButton = document.getElementById('sendButton');
-        
-        let draggedCard = null;
-        
-        cards.forEach(card => {
-            card.addEventListener('dragstart', (e) => {
-                draggedCard = {
-                    value: parseFloat(e.target.dataset.value),
-                    type: e.target.dataset.type,
-                    text: e.target.textContent
-                };
-                e.dataTransfer.effectAllowed = 'copy';
-            });
-        });
-        
-        stackArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            stackArea.classList.add('drag-over');
-        });
-        
-        stackArea.addEventListener('dragleave', () => {
-            stackArea.classList.remove('drag-over');
-        });
-        
-        stackArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            stackArea.classList.remove('drag-over');
-            
-            if (draggedCard) {
-                stack.push(draggedCard);
-                updateStack();
-                draggedCard = null;
-            }
-        });
-        
-        function updateStack() {
-            stackedCardsContainer.innerHTML = '';
-            currentTotal = 0;
-            
-            // Sort by value (largest first)
-            stack.sort((a, b) => b.value - a.value);
-            
-            stack.forEach((card, index) => {
-                currentTotal += card.value;
-                
-                const stackedCard = document.createElement('div');
-                stackedCard.className = `stacked-card ${card.type}`;
-                stackedCard.innerHTML = `
-                    <span>${card.text}</span>
-                    <button class="remove" onclick="removeCard(${index})">×</button>
-                `;
-                stackedCardsContainer.appendChild(stackedCard);
-            });
-            
-            totalDisplay.textContent = `Total: ${currentTotal.toFixed(2)}`;
-            sendButton.disabled = stack.length === 0;
-        }
-        
-        function removeCard(index) {
-            stack.splice(index, 1);
-            updateStack();
-        }
-        
-        // Send to Number Line with drag between panels
-        sendButton.addEventListener('click', () => {
-            updateNumberLine(currentTotal);
-            updateBuilder(currentTotal);
-        });
-        
-        // Make send button draggable
-        sendButton.draggable = true;
-        sendButton.addEventListener('dragstart', (e) => {
-            if (stack.length > 0) {
-                e.dataTransfer.setData('decimal', currentTotal);
-                e.dataTransfer.effectAllowed = 'copy';
-            } else {
-                e.preventDefault();
-            }
-        });
-        
-        // Panel 2: Number Line
+        const numberInput = document.getElementById('numberInput');
         const numberLine = document.getElementById('numberLine');
+        const zoomInfo = document.getElementById('zoomInfo');
         const zoomOnes = document.getElementById('zoomOnes');
         const zoomTenths = document.getElementById('zoomTenths');
         const zoomHundredths = document.getElementById('zoomHundredths');
-        const mistakeToggle = document.getElementById('mistakeToggle');
-        const mistakeMessage = document.getElementById('mistakeMessage');
         
-        // Make number line accept drops
-        numberLine.addEventListener('dragover', (e) => {
-            e.preventDefault();
+        // Input change handler
+        numberInput.addEventListener('input', () => {
+            currentValue = parseFloat(numberInput.value) || 0;
+            updateNumberLine();
         });
         
-        numberLine.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const value = parseFloat(e.dataTransfer.getData('decimal'));
-            if (!isNaN(value)) {
-                updateNumberLine(value);
-                updateBuilder(value);
-            }
-        });
-        
+        // Zoom button handlers
         zoomOnes.addEventListener('click', () => {
             currentZoom = 'ones';
             updateZoomButtons();
-            if (currentTotal > 0) updateNumberLine(currentTotal);
+            updateNumberLine();
         });
         
         zoomTenths.addEventListener('click', () => {
             currentZoom = 'tenths';
             updateZoomButtons();
-            if (currentTotal > 0) updateNumberLine(currentTotal);
+            updateNumberLine();
         });
         
         zoomHundredths.addEventListener('click', () => {
             currentZoom = 'hundredths';
             updateZoomButtons();
-            if (currentTotal > 0) updateNumberLine(currentTotal);
-        });
-        
-        mistakeToggle.addEventListener('change', () => {
-            if (currentTotal > 0) updateNumberLine(currentTotal);
+            updateNumberLine();
         });
         
         function updateZoomButtons() {
@@ -651,195 +296,88 @@
             if (currentZoom === 'hundredths') zoomHundredths.classList.add('active');
         }
         
-        function updateNumberLine(value) {
+        function updateNumberLine() {
             numberLine.innerHTML = '';
             
-            let min, max, step, roundTo;
+            let min, max, majorStep, minorStep, decimals, zoomText, explanation;
             
             if (currentZoom === 'ones') {
-                min = Math.floor(value);
+                // Show the whole number it's between
+                min = Math.floor(currentValue);
                 max = min + 1;
-                step = 0.1;
-                roundTo = 1;
+                majorStep = 1;
+                minorStep = 0.1;
+                decimals = 1;
+                zoomText = "Ones Place";
+                explanation = `Looking at ${min} to ${max}. Each small tick = 0.1`;
             } else if (currentZoom === 'tenths') {
-                min = Math.floor(value * 10) / 10;
+                // Show the tenth it's between
+                min = Math.floor(currentValue * 10) / 10;
                 max = min + 0.1;
-                step = 0.01;
-                roundTo = 0.1;
+                majorStep = 0.1;
+                minorStep = 0.01;
+                decimals = 2;
+                zoomText = "Tenths Place";
+                explanation = `Looking at ${min.toFixed(1)} to ${max.toFixed(1)}. Each small tick = 0.01`;
             } else {
-                min = Math.floor(value * 100) / 100;
+                // Show the hundredth it's between
+                min = Math.floor(currentValue * 100) / 100;
                 max = min + 0.01;
-                step = 0.001;
-                roundTo = 0.01;
+                majorStep = 0.01;
+                minorStep = 0.001;
+                decimals = 3;
+                zoomText = "Hundredths Place";
+                explanation = `Looking at ${min.toFixed(2)} to ${max.toFixed(2)}. Each tiny tick = 0.001`;
             }
             
-            // Draw ticks
-            for (let i = min; i <= max; i += (max - min) / 10) {
+            // Draw minor ticks (10 divisions)
+            for (let i = 0; i <= 10; i++) {
+                const value = min + (max - min) * (i / 10);
+                const position = (i / 10) * 100;
+                
                 const tick = document.createElement('div');
                 tick.className = 'tick';
-                tick.style.left = ((i - min) / (max - min) * 100) + '%';
-                
-                const label = document.createElement('div');
-                label.className = 'tick-label';
-                label.textContent = i.toFixed(currentZoom === 'ones' ? 1 : currentZoom === 'tenths' ? 2 : 3);
-                label.style.left = ((i - min) / (max - min) * 100) + '%';
-                
+                if (i === 0 || i === 10) {
+                    tick.classList.add('major');
+                }
+                tick.style.left = position + '%';
                 numberLine.appendChild(tick);
-                numberLine.appendChild(label);
+                
+                // Only label major ticks and midpoint
+                if (i === 0 || i === 5 || i === 10) {
+                    const label = document.createElement('div');
+                    label.className = 'tick-label';
+                    if (i === 0 || i === 10) {
+                        label.classList.add('major');
+                    }
+                    label.textContent = value.toFixed(decimals);
+                    label.style.left = position + '%';
+                    numberLine.appendChild(label);
+                }
             }
             
-            // Draw zones
-            const midpoint = (min + max) / 2;
-            const redZone = document.createElement('div');
-            redZone.className = 'zone-overlay red';
-            redZone.style.left = '0%';
-            redZone.style.width = '50%';
-            
-            const blueZone = document.createElement('div');
-            blueZone.className = 'zone-overlay blue';
-            blueZone.style.left = '50%';
-            blueZone.style.width = '50%';
-            
-            numberLine.appendChild(redZone);
-            numberLine.appendChild(blueZone);
-            
             // Draw ghost dot
-            const position = ((value - min) / (max - min) * 100);
+            const position = ((currentValue - min) / (max - min) * 100);
             const ghostDot = document.createElement('div');
-            ghostDot.className = 'ghost-dot animate';
+            ghostDot.className = 'ghost-dot';
             ghostDot.style.left = position + '%';
             numberLine.appendChild(ghostDot);
             
-            // Mistake mode
-            if (mistakeToggle.checked) {
-                // Common mistake: just looking at last digit for rounding
-                const lastDigit = parseInt(value.toString().split('').pop());
-                let wrongRounded;
-                
-                if (currentZoom === 'ones') {
-                    wrongRounded = lastDigit >= 5 ? Math.ceil(value) : Math.floor(value);
-                } else if (currentZoom === 'tenths') {
-                    wrongRounded = lastDigit >= 5 ? Math.ceil(value * 10) / 10 : Math.floor(value * 10) / 10;
-                } else {
-                    wrongRounded = lastDigit >= 5 ? Math.ceil(value * 100) / 100 : Math.floor(value * 100) / 100;
-                }
-                
-                const correctRounded = Math.round(value / roundTo) * roundTo;
-                
-                if (Math.abs(wrongRounded - correctRounded) > 0.001) {
-                    const wrongPosition = ((wrongRounded - min) / (max - min) * 100);
-                    const wrongDot = document.createElement('div');
-                    wrongDot.className = 'wrong-dot';
-                    wrongDot.style.left = wrongPosition + '%';
-                    numberLine.appendChild(wrongDot);
-                    
-                    mistakeMessage.classList.add('show');
-                    mistakeMessage.innerHTML = `
-                        <strong>Common Mistake:</strong> If you just looked at the "${lastDigit}" and used "5 or more," 
-                        you'd land at <strong>${wrongRounded.toFixed(3)}</strong>. But look—<strong>${value.toFixed(3)}</strong> 
-                        is actually closer to <strong>${correctRounded.toFixed(3)}</strong> 
-                        (in the ${value < midpoint ? 'red' : 'blue'} zone).
-                    `;
-                } else {
-                    mistakeMessage.classList.remove('show');
-                }
-            } else {
-                mistakeMessage.classList.remove('show');
-            }
+            // Update info
+            zoomInfo.innerHTML = `
+                <h3>Zoomed to: ${zoomText}</h3>
+                <p><strong>${currentValue}</strong> is here. ${explanation}</p>
+            `;
         }
         
-        // Panel 3: Builder
-        const tensSlot = document.getElementById('tensSlot');
-        const onesSlot = document.getElementById('onesSlot');
-        const tenthsSlot = document.getElementById('tenthsSlot');
-        const hundredthsSlot = document.getElementById('hundredthsSlot');
-        const builderEquation = document.getElementById('builderEquation');
-        const clearBuilder = document.getElementById('clearBuilder');
-        
-        const slots = [tensSlot, onesSlot, tenthsSlot, hundredthsSlot];
-        
-        slots.forEach(slot => {
-            slot.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                slot.classList.add('drag-over');
-            });
-            
-            slot.addEventListener('dragleave', () => {
-                slot.classList.remove('drag-over');
-            });
-            
-            slot.addEventListener('drop', (e) => {
-                e.preventDefault();
-                slot.classList.remove('drag-over');
-                
-                if (draggedCard) {
-                    const place = slot.dataset.place;
-                    const value = draggedCard.value;
-                    
-                    // Map card values to places
-                    if ((place === 'tens' && value === 1) ||
-                        (place === 'ones' && value === 1) ||
-                        (place === 'tenths' && value === 0.1) ||
-                        (place === 'hundredths' && value === 0.01)) {
-                        
-                        builderSlots[place]++;
-                        updateBuilderDisplay();
-                    }
-                }
-            });
-        });
-        
-        function updateBuilder(value) {
-            // Decompose the value
-            builderSlots.tens = Math.floor(value / 10);
-            builderSlots.ones = Math.floor(value % 10);
-            builderSlots.tenths = Math.floor((value * 10) % 10);
-            builderSlots.hundredths = Math.floor((value * 100) % 10);
-            
-            updateBuilderDisplay();
+        function setNumber(num) {
+            numberInput.value = num;
+            currentValue = num;
+            updateNumberLine();
         }
         
-        function updateBuilderDisplay() {
-            // Update slot displays
-            tensSlot.querySelector('.slot-value').textContent = builderSlots.tens > 0 ? builderSlots.tens * 10 : '';
-            onesSlot.querySelector('.slot-value').textContent = builderSlots.ones > 0 ? builderSlots.ones : '';
-            tenthsSlot.querySelector('.slot-value').textContent = builderSlots.tenths > 0 ? (builderSlots.tenths * 0.1).toFixed(1) : '';
-            hundredthsSlot.querySelector('.slot-value').textContent = builderSlots.hundredths > 0 ? (builderSlots.hundredths * 0.01).toFixed(2) : '';
-            
-            // Update filled status
-            slots.forEach(slot => {
-                const place = slot.dataset.place;
-                if (builderSlots[place] > 0) {
-                    slot.classList.add('filled');
-                } else {
-                    slot.classList.remove('filled');
-                }
-            });
-            
-            // Build equation
-            const parts = [];
-            if (builderSlots.tens > 0) parts.push(`${builderSlots.tens * 10}`);
-            if (builderSlots.ones > 0) parts.push(`${builderSlots.ones}`);
-            if (builderSlots.tenths > 0) parts.push(`${(builderSlots.tenths * 0.1).toFixed(1)}`);
-            if (builderSlots.hundredths > 0) parts.push(`${(builderSlots.hundredths * 0.01).toFixed(2)}`);
-            
-            if (parts.length > 0) {
-                const total = (builderSlots.tens * 10 + builderSlots.ones + builderSlots.tenths * 0.1 + builderSlots.hundredths * 0.01).toFixed(2);
-                builderEquation.textContent = `${parts.join(' + ')} = ${total}`;
-            } else {
-                builderEquation.textContent = 'Drag cards here to see the equation';
-            }
-        }
-        
-        clearBuilder.addEventListener('click', () => {
-            builderSlots = {
-                tens: 0,
-                ones: 0,
-                tenths: 0,
-                hundredths: 0
-            };
-            updateBuilderDisplay();
-        });
+        // Initialize
+        updateNumberLine();
     </script>
 </body>
 </html>
