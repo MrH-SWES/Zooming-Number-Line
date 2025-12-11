@@ -77,7 +77,6 @@
             border-bottom-color: #2980b9;
         }
         
-        /* Remove spinner buttons */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -90,7 +89,7 @@
         .number-line-container {
             position: relative;
             margin: 40px 0;
-            min-height: 120px;
+            min-height: 140px;
             cursor: ns-resize;
         }
         
@@ -103,21 +102,23 @@
         
         .tick {
             position: absolute;
-            top: 0;
+            top: 20%;
             width: 2px;
-            height: 100%;
+            height: 60%;
             background: #95a5a6;
+            transform: translateX(-50%);
         }
         
         .tick.major {
+            top: 10%;
             width: 3px;
+            height: 80%;
             background: #2c3e50;
         }
         
         .tick-label {
             position: absolute;
             top: 110px;
-            left: 50%;
             transform: translateX(-50%);
             font-weight: bold;
             font-size: 1.1rem;
@@ -127,16 +128,52 @@
         
         .ghost-dot {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             background: #e74c3c;
             border: 3px solid white;
             border-radius: 50%;
             top: 50%;
-            left: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
             box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+        
+        .dot-label {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .dot-label::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #e74c3c;
+        }
+        
+        .zoom-level-label {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-top: 30px;
+        }
+        
+        .zoom-level-label strong {
+            color: #2c3e50;
         }
         
         @media (max-width: 768px) {
@@ -181,6 +218,10 @@
         <div class="number-line-container" id="numberLineContainer">
             <div class="number-line" id="numberLine"></div>
         </div>
+        
+        <div class="zoom-level-label">
+            Zoom: <strong id="zoomLevelName">Ones</strong>
+        </div>
     </div>
     
     <script>
@@ -206,6 +247,7 @@
         const numberLine = document.getElementById('numberLine');
         const numberLineContainer = document.getElementById('numberLineContainer');
         const zoomIndicator = document.getElementById('zoomIndicator');
+        const zoomLevelName = document.getElementById('zoomLevelName');
         
         numberInput.addEventListener('input', () => {
             const val = parseFloat(numberInput.value);
@@ -267,27 +309,65 @@
             return Math.sqrt(dx * dx + dy * dy);
         }
         
+        function formatNumber(value, decimals) {
+            // Ones and above (decimals <= 1): no decimal points
+            if (decimals <= 1) {
+                if (Math.abs(value) >= 1000) {
+                    return Math.round(value).toLocaleString();
+                }
+                return Math.round(value).toString();
+            }
+            // Decimal zoom levels: tenths = 1 decimal, hundredths = 2, etc.
+            return value.toFixed(decimals - 1);
+        }
+        
+        function formatDotLabel(value, decimals) {
+            // Dot label shows precision matching zoom level
+            // Ones = no decimal, Tenths = 1 decimal, Hundredths = 2, etc.
+            if (decimals <= 1) {
+                // Ones or larger - no decimals needed
+                if (Math.abs(value) >= 1000) {
+                    return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+                }
+                return Math.round(value).toString();
+            } else {
+                // Decimal zoom levels
+                return value.toFixed(decimals - 1);
+            }
+        }
+        
         function updateNumberLine() {
             numberLine.innerHTML = '';
             
             const zoom = ZOOM_LEVELS[currentZoomIndex];
             const step = zoom.step;
             const decimals = zoom.decimals;
+            const visibleRange = step * 10;
             
-            // Update zoom indicator position (0 = leftmost, 10 = rightmost)
+            // Update zoom indicator
             const indicatorPosition = (currentZoomIndex / (ZOOM_LEVELS.length - 1)) * 100;
             zoomIndicator.style.left = `calc(${indicatorPosition}% - 2px)`;
             
-            // Number line from 0 to (currentValue + half step)
-            const min = 0;
-            const max = currentValue + step / 2;
+            // Update zoom level name
+            zoomLevelName.textContent = zoom.name;
             
-            // Calculate position of red dot
-            const dotPosition = (currentValue / max) * 100;
+            // Calculate the visible window
+            // Ideally centered on currentValue, but min can't go below 0
+            let min = currentValue - (visibleRange / 2);
+            let max = currentValue + (visibleRange / 2);
             
-            // Draw 11 ticks
+            // Clamp to non-negative
+            if (min < 0) {
+                min = 0;
+                max = visibleRange;
+            }
+            
+            // Calculate dot position (where currentValue falls in the visible range)
+            const dotPosition = ((currentValue - min) / visibleRange) * 100;
+            
+            // Draw 11 ticks (0 through 10)
             for (let i = 0; i <= 10; i++) {
-                const value = min + (max - min) * (i / 10);
+                const tickValue = min + (visibleRange * (i / 10));
                 const position = (i / 10) * 100;
                 
                 const tick = document.createElement('div');
@@ -299,28 +379,28 @@
                 numberLine.appendChild(tick);
             }
             
-            // Label left (0), middle, right
+            // Labels at 0%, 50%, 100%
             [0, 5, 10].forEach(i => {
-                const value = min + (max - min) * (i / 10);
+                const tickValue = min + (visibleRange * (i / 10));
                 const position = (i / 10) * 100;
                 
                 const label = document.createElement('div');
                 label.className = 'tick-label';
                 label.style.left = position + '%';
-                
-                if (decimals === 0 && value >= 1000) {
-                    label.textContent = value.toLocaleString(undefined, {maximumFractionDigits: 0});
-                } else {
-                    label.textContent = value.toFixed(decimals);
-                }
-                
+                label.textContent = formatNumber(tickValue, decimals);
                 numberLine.appendChild(label);
             });
             
-            // Ghost dot at value position
+            // Ghost dot with label
             const ghostDot = document.createElement('div');
             ghostDot.className = 'ghost-dot';
             ghostDot.style.left = dotPosition + '%';
+            
+            const dotLabel = document.createElement('div');
+            dotLabel.className = 'dot-label';
+            dotLabel.textContent = formatDotLabel(currentValue, decimals);
+            ghostDot.appendChild(dotLabel);
+            
             numberLine.appendChild(ghostDot);
         }
         
